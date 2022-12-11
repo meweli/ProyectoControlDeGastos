@@ -1,0 +1,35 @@
+.rect{  
+    margin:0 0 20px;
+    padding: 20px;
+    border:2px ;
+    background-color: #d5fe95
+    width 80%;
+    text-align:center;
+
+  }
+  .header{
+     margin:0 auto;
+     padding: 5px 10px;
+     width:90%;
+     border:2px;
+     background-color: #fdcfe5;
+  }
+  .box{
+    margin: 5px 0;
+    border:2px solid #d5fe95;
+    background-color: #d5fe95;
+  }
+
+  .flex-container {
+    display: flex;
+}
+
+.flex-child {
+    flex: 1;
+    border: 2px solid #d5fe95;
+    background-color: #d5fe95;
+}  
+
+.flex-child:first-child {
+    margin-right: 10px;
+} 

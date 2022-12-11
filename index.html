@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de gastos</title>
+    <link rel="stylesheet" href="//style.css">
+    <style>
+    </style>
+    
+</head>
+<body>
+    <div class="rect">
+        <div> 
+            <h1>Control de gastos</h1>
+        </div>  
+    </div>  
+
+    <div class="rect"> 
+        <div class = "header">
+            <h2>Tu ahorro: <span id="Total"></span></h2>
+        </div>
+    </div>
+    <div class="flex-container">
+        <div class="flex-child magenta" >
+            <h3>Gastos: <span id="totalGastos"></span></h3>
+        </div>
+        <div class="flex-child green">
+            <h3>Ingresos: <span id="totalIngresos"></span></h3>
+        </div>
+    </div>
+    
+    <div class="rect">
+        <div class = "header">
+    <h2> Añadir transacción:</h2>
+    <form>
+        <label for="amount">Cantidad:</label>
+        <input type="number" id="amount" name="amount">
+        <label for="concept">Concepto:</label>
+        <input type="text" id="concept" name="concept">
+        <label for="type">Tipo:</label>
+        <select id="type" name="type">
+            <option value="ingreso">Ingreso</option>
+            <option value="gasto">Gasto</option>
+        </select>
+        <button type="button" onclick="addRecord()">Añadir</button>
+    </form> 
+
+    <h3>Tu historial:</h3>
+    <ul id="records"></ul>
+    <button id="delete">Borrar todo</button>
+    <script>
+
+        let income = 0;
+        let expenses = 0;
+        let records = {};
+        let unique_id = 0;
+
+        function addRecord() {
+
+            let amount = document.getElementById("amount").value;
+            let concept = document.getElementById("concept").value;
+            let type = document.getElementById("type").value;
+
+            updateOperationBalance(type, amount);
+            updateHTMLBalance();
+
+            // Save record (todo... internal storage)
+            record = {type: type, concept: concept, amount: parseFloat(amount)};
+            records[unique_id] = record;
+
+            // Create its HTML entry and add it to all records
+            listItem = genItemHTML(unique_id, record);
+            let recordsObj = document.getElementById("records");
+            recordsObj.appendChild(listItem);
+
+            unique_id += 1;
+        }
+
+        function saveRecordsToLocal() {
+            // Saves current state to a json file
+            let recordsJSON = Object.fromEntries(records);
+            fs.writeFileSync("./records.json", recordsJSON, 'utf8'); 
+        }
+
+        function genItemHTML(unique_id, record) {
+            // Create the basic item
+            let listItem = document.createElement("li");
+            listItem.id = unique_id;
+            let symbol = record.type === "ingreso" ? "(͠≖ ͜ʖ͠≖)👌" : "(╥﹏╥)👊";
+            listItem.innerHTML = `${symbol}${record.concept} ➮ ${record.type === "ingreso" ? record.amount : -record.amount}$ (${record.type})`;
+
+            // Create a linked Delete button
+            let delButton = document.createElement("button");
+            delButton.innerHTML = "Borrar";
+            delButton.onclick = createDelFn();
+            listItem.appendChild(delButton);
+
+            return listItem;
+        }
+
+        function updateOperationBalance (operationType, amount) {
+            if (operationType === "ingreso") {
+                income += parseFloat(amount);
+            } else {
+                expenses += parseFloat(amount);
+            }
+        }
+
+        function createDelFn() {
+            return function(event) {
+                liID = event.target.parentNode.id;
+                targetRecord = records[liID];
+                
+                updateOperationBalance(targetRecord.type, -targetRecord.amount);
+
+                updateHTMLBalance();
+
+                let recordsObj = document.getElementById("records");
+                recordsObj.removeChild(event.target.parentNode);
+                records.delete(liID);
+            }
+        }
+
+        function updateHTMLBalance() {
+            document.getElementById("totalGastos").innerHTML = expenses;
+            document.getElementById("totalIngresos").innerHTML = income;
+            document.getElementById("Total").innerHTML = getBalance();
+        }
+
+        function getBalance() {
+            return income - expenses;
+        }
+
+        let deleteAllButton = document.getElementById("delete");
+
+        deleteAllButton.onclick = function(event) {
+            let recordsObj = document.getElementById("records");
+            recordsObj.innerHTML = "";
+            expenses = 0;
+            income = 0;
+
+            updateHTMLBalance();
+        }
+
+    </script>
+    
+</body>
+</html>
